@@ -13,13 +13,20 @@ steps:
       - 'container'
       - 'clusters'
       - 'get-credentials'
-      - 'cloud-a3'
+      - 'cloud-a3-cluster'
       - '--zone'
       - 'us-central1-c'
       - '--project'
       - 'cloud-a3-454015'
+  
+  # Step 4: Create Persistent Volume Claim (PVC)
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args:
+      - 'apply'
+      - '-f'
+      - 'pv-claim.yaml'
 
-  # Step 4: Deploy the application and service to GKE
+  # Step 5: Deploy the application and service to GKE
   - name: 'gcr.io/cloud-builders/kubectl'
     args:
       - 'apply'
