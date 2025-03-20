@@ -1,32 +1,41 @@
-#step 1: Build the docker image
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['build','-t','us-central1-docker.pkg.dev/cloud-a3-454015/cloud-a3/process','.']
+steps:
+  # Step 1: Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/cloud-a3-454015/cloud-a3/process:$SHORT_SHA', '.']
 
-#step 2: Push the docker image to AR
-- name: 'gce.io/cloud-builders/docker'
-  args: ['push','us-central1-docker.pkg.dev/cloud-a3-454015/cloud-a3/process']
+  # Step 2: Push the Docker image to Artifact Registry (AR)
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us-central1-docker.pkg.dev/cloud-a3-454015/cloud-a3/process:$SHORT_SHA']
 
-#step 3: Configure kubectl with the GKE Cluster
-- name: 'gcr.io/cloud-builders/gcloud'
-  args: 
-  - 'containers'
-  - 'cluster'
-  - 'get-credentials'
-  - 'cloud-a3'
-  - '--zone'
-  - 'us-central1-c'
-  - '--project'
-  - 'cloud-a3-454015'
+  # Step 3: Configure kubectl with the GKE Cluster
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - 'container'
+      - 'clusters'
+      - 'get-credentials'
+      - 'cloud-a3'
+      - '--zone'
+      - 'us-central1-c'
+      - '--project'
+      - 'cloud-a3-454015'
 
-#step 4: Deploy the application and service to GKE
-- name: 'gcr.io/cloud-builders/kubectl'
-  args:
-  - 'apply'
-  - '-f'
-  - 'deployment.yaml'
+  # Step 4: Deploy the application and service to GKE
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args:
+      - 'apply'
+      - '-f'
+      - 'deployment.yaml'
 
-#step 5: 
-  images:
-  - 'us-central1-docker.pkg.dev/cloud-a3-454015/cloud-a3/process' 
+   # Force the pods to restart with the new image (using the unique tag)
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args: ['set', 'image', 'deployment/validate-app', 'process=us-central1-docker.pkg.dev/cloud-a3-454015/cloud-a3/process:$SHORT_SHA']
 
+# Define images for Cloud Build
+images:
+  - 'us-central1-docker.pkg.dev/cloud-a3-454015/cloud-a3/process:$SHORT_SHA'
 
+options:
+  env:
+    - 'CLOUDSDK_COMPUTE_ZONE=us-central1-c'
+    - 'CLOUDSDK_CONTAINER_CLUSTER=cloud-a3'
+  logging: CLOUD_LOGGING_ONLY
