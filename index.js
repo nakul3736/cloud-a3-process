@@ -6,7 +6,7 @@ const path = require('path');
 
 const app = express();
 const PORT = 7000;
-
+ 
 // Middleware to parse JSON requests.
 app.use(express.json());
 
