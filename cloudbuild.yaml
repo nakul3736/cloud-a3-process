@@ -1,0 +1,32 @@
+#step 1: Build the docker image
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build','-t','us-central1-docker.pkg.dev/cloud-a3-454015/cloud-a3/process','.']
+
+#step 2: Push the docker image to AR
+- name: 'gce.io/cloud-builders/docker'
+  args: ['push','us-central1-docker.pkg.dev/cloud-a3-454015/cloud-a3/process']
+
+#step 3: Configure kubectl with the GKE Cluster
+- name: 'gcr.io/cloud-builders/gcloud'
+  args: 
+  - 'containers'
+  - 'cluster'
+  - 'get-credentials'
+  - 'cloud-a3'
+  - '--zone'
+  - 'us-central1-c'
+  - '--project'
+  - 'cloud-a3-454015'
+
+#step 4: Deploy the application and service to GKE
+- name: 'gcr.io/cloud-builders/kubectl'
+  args:
+  - 'apply'
+  - '-f'
+  - 'deployment.yaml'
+
+#step 5: 
+  images:
+  - 'us-central1-docker.pkg.dev/cloud-a3-454015/cloud-a3/process' 
+
+

@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: process-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: process-app
+  template:
+    metadata:
+      labels:
+        app: process-app
+    spec:
+      containers:
+      - name: process
+        image: us-central1-docker.pkg.dev/cloud-a3-454015/cloud-a3/process
+        volumeMounts:
+        - mountPath: /nakul_PV_dir
+          name: cloud-a3-volume
+        ports:
+        - containerPort: 7000
+      volumes:
+      - name: cloud-a3-volume
+        persistentVolumeClaim:
+          claimName: cloud-a3-pvc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: process-service
+spec:
+  selector:
+    app: process-app
+  ports:
+    - protocol: TCP
+      port: 7000
+      targetPort: 7000
+  type: ClusterIP
