@@ -18,7 +18,7 @@ app.post('/process', async (req, res) => {
     if (!file || !product) {
         return res.status(400).json({ error: 'Invalid input: "file" and "product" parameters are required.' });
     }
-    console.log("From container 2");
+    console.log("From container 2"); 
      // Construct the file path in the shared volume
      const filePath = path.join('/nakul_PV_dir', file);
 
